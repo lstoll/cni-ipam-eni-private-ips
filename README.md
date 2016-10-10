@@ -1,6 +1,6 @@
 # CNI IPAM For AWS EIPs
 
-This is an [IPAM plugin](https://github.com/containernetworking/cni/blob/master/SPEC.md#ip-allocation) for [CN](https://github.com/containernetworking/cni)I.
+This is an [IPAM plugin](https://github.com/containernetworking/cni/blob/master/SPEC.md#ip-allocation) for [CNI](https://github.com/containernetworking/cni).
 
 It uses the instance metadata API to get a list of EIPs on a given interface to
 determine the available allocation pool. It is particularly useful with the
