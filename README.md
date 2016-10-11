@@ -39,3 +39,7 @@ Overriding (for testing)
     }
 }
 ```
+
+## Future plans
+
+It would be nice if this could (optionally) talk to the API to manage the IP pool
