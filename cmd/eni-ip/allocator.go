@@ -34,8 +34,8 @@ import (
 var ErrInvalidConfig = errors.New("Either Interface or Override must be set")
 
 // ErrEmptyPool is returned if the IP pool is configured with 0 IPs, e.g no
-// EIP's attached
-var ErrEmptyPool = errors.New("No EIPs found on interface")
+// additional IPs attached to the interface
+var ErrEmptyPool = errors.New("No free private IPs found on interface")
 
 // IPAllocator is the implementation of the actual allocator
 type IPAllocator struct {
