@@ -30,6 +30,7 @@ type IPAMConfig struct {
 	Interface      string    `json:"interface"`
 	OverrideIPs    []net.IP  `json:"override_ips"`
 	OverrideSubnet string    `json:"override_subnet"`
+	Dynamic        bool      `json:"dynamic"`
 	Args           *IPAMArgs `json:"-"`
 }
 

@@ -16,8 +16,6 @@
 package main
 
 import (
-	"github.com/containernetworking/cni/plugins/ipam/host-local/backend/disk"
-
 	"github.com/containernetworking/cni/pkg/skel"
 	"github.com/containernetworking/cni/pkg/types"
 	"github.com/containernetworking/cni/pkg/version"
@@ -32,8 +30,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 	if err != nil {
 		return err
 	}
-
-	store, err := disk.New(ipamConf.Name)
+	store, err := NewStore(ipamConf.Name)
 	if err != nil {
 		return err
 	}
@@ -61,7 +58,7 @@ func cmdDel(args *skel.CmdArgs) error {
 		return err
 	}
 
-	store, err := disk.New(ipamConf.Name)
+	store, err := NewStore(ipamConf.Name)
 	if err != nil {
 		return err
 	}

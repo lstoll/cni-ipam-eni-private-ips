@@ -12,7 +12,7 @@ useful in testing.
 
 This will use the [host-local disk backend](https://github.com/containernetworking/cni/tree/master/plugins/ipam/host-local) for allocation persistence.
 
-Sample network config, will look for additional free IPs on eth2
+Sample network config, will look for additional pre-assigned free IPs on eth2
 
 ```json
 {
@@ -23,6 +23,41 @@ Sample network config, will look for additional free IPs on eth2
     }
 }
 ```
+
+In dynamic mode, the IPs do not be pre-allocated, the driver will request/free them on demand. This requires the correct instance IAM permissions.
+
+```json
+{
+    "name": "default",
+    "ipam": {
+        "type": "eni-ip",
+        "interface": "eth2",
+        "dynamic": true
+    }
+}
+```
+
+Will need an IAM policy assigned to the instance like
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Stmt1476573934000",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:AssignPrivateIpAddresses",
+                "ec2:UnassignPrivateIpAddresses"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}
+```
+
 
 
 Overriding (for testing)
@@ -42,4 +77,4 @@ Overriding (for testing)
 
 ## Future plans
 
-It would be nice if this could (optionally) talk to the API to manage the IP pool
+Private IP slack pool, real error handling
