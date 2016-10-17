@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+
+echo '--> Testing'
+go test -v ./...
+
+echo "--> Creating artifacts"
+mkdir -p out
+go build -o eni-ip ./cmd/eni-ip
+if [ ! -z "$TRAVIS_BRANCH" ]; then
+    if [ "$TRAVIS_BRANCH" == "master" ]; then
+        cp eni-ip out/eni-ip
+    else
+        cp eni-ip out/eni-ip-$TRAVIS_BRANCH
+    fi
+fi

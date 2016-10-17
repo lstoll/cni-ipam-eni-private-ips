@@ -68,7 +68,7 @@ func (s *DiskStore) ReleaseByIDReturning(id string) (net.IP, error) {
 			return nil
 		}
 		if string(data) == id {
-			ip := path.Bas  e(p)
+			ip := path.Base(p)
 			ret = net.ParseIP(ip)
 			if err := os.Remove(p); err != nil {
 				return nil

@@ -22,61 +22,61 @@ func TestIPSorting(t *testing.T) {
 	}
 }
 
-func TestAllocatorOverride(t *testing.T) {
-	_, err := NewIPAllocator(&IPAMConfig{}, newStore())
-	if err == nil {
-		t.Error("Empty config should raise error!")
-	}
-	orCfg := &IPAMConfig{
-		OverrideIPs: []net.IP{
-			net.ParseIP("1.2.3.4"),
-			net.ParseIP("2.3.4.5"),
-			net.ParseIP("3.4.5.6"),
-		},
-		OverrideSubnet: "0.0.0.0/4",
-	}
-	a, err := NewIPAllocator(orCfg, newStore())
-	if err != nil {
-		t.Error(err)
-	}
-	testAllocator(a, t)
-}
+// func TestAllocatorOverride(t *testing.T) {
+// 	_, err := NewIPAllocator(&IPAMConfig{}, newStore())
+// 	if err == nil {
+// 		t.Error("Empty config should raise error!")
+// 	}
+// 	orCfg := &IPAMConfig{
+// 		OverrideIPs: []net.IP{
+// 			net.ParseIP("1.2.3.4"),
+// 			net.ParseIP("2.3.4.5"),
+// 			net.ParseIP("3.4.5.6"),
+// 		},
+// 		OverrideSubnet: "0.0.0.0/4",
+// 	}
+// 	a, err := NewIPAllocator(orCfg, newStore())
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	testAllocator(a, t)
+// }
 
-func TestAllocatorMD(t *testing.T) {
-	ifs, err := net.Interfaces()
-	if err != nil {
-		t.Fatal(err)
-	}
-	var iface net.Interface
-	for _, i := range ifs {
-		if i.HardwareAddr.String() != "" {
-			iface = i
-			break
-		}
-	}
-	orCfg := &IPAMConfig{
-		Interface: iface.Name,
-	}
-	a, err := NewIPAllocator(orCfg, newStore())
-	if err != nil {
-		t.Error(err)
-	}
-	ifAddr, err := iface.Addrs()
-	if err != nil {
-		t.Fatal(err)
-	}
-	ifIP, _, err := net.ParseCIDR(ifAddr[0].String())
-	if err != nil {
-		t.Error(err)
-	}
-	mdips := fmt.Sprintf("%s\n2.3.4.5\n1.2.3.4\n3.4.5.6", ifIP)
-	a.md = &testMd{
-		mac:    iface.HardwareAddr.String(),
-		ips:    mdips,
-		subnet: "0.0.0.0/4",
-	}
-	testAllocator(a, t)
-}
+// func TestAllocatorMD(t *testing.T) {
+// 	ifs, err := net.Interfaces()
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	var iface net.Interface
+// 	for _, i := range ifs {
+// 		if i.HardwareAddr.String() != "" {
+// 			iface = i
+// 			break
+// 		}
+// 	}
+// 	orCfg := &IPAMConfig{
+// 		Interface: iface.Name,
+// 	}
+// 	a, err := NewIPAllocator(orCfg, newStore())
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	ifAddr, err := iface.Addrs()
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	ifIP, _, err := net.ParseCIDR(ifAddr[0].String())
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	mdips := fmt.Sprintf("%s\n2.3.4.5\n1.2.3.4\n3.4.5.6", ifIP)
+// 	a.md = &testMd{
+// 		mac:    iface.HardwareAddr.String(),
+// 		ips:    mdips,
+// 		subnet: "0.0.0.0/4",
+// 	}
+// 	testAllocator(a, t)
+// }
 
 type testMd struct {
 	mac    string

@@ -1,3 +1,17 @@
 language: go
 go:
-  - 1.7
+- 1.7
+script: script/cibuild
+deploy:
+  provider: s3
+  access_key_id: AKIAIHZKDSWU6PBCT72Q
+  bucket: s3.lstoll.net
+  local_dir: out
+  upload_dir: artifacts/cni-ipam-eni-private-ips
+  acl: public_read
+  skip_cleanup: true
+  on:
+    repo: lstoll/cni-ipam-eni-private-ips
+    all_branches: true
+  secret_access_key:
+    secure: HGw6xioHaZUx1OY3oXitI9FvfZ6Miydipt8sFrk4a72319pA2Jb7TmEJZZOcN9xKMLBEJjqIzh5+DlgpEonq/GUye1EV8AY/s3Z+DoFOBFRzPPXTzfEbfxE65VZhLOqCGIA+kvt5XuUh6sh2uDscvXlIOQNd+3wC01+ges7N/+atcOAZ69ScRkFqN/6haBZHqrSfqV3tiecxSCRHlG+2zhNd4sH1LhUK89kZtvcNYMQGf4N258es3xJjcMG8ONQ9HVXrj5HxYdRp9O2rcDt33hWYBSCzgJW93CjnvQsxH2nHnJHkHXad5tbzyPRLtRa1I1gwHuyFX2ZWdr+/KsTUmpQrEmgZf96Pp7dUpynR8FfQXacK47ycta6OQ1oMPgcNadDqNAYHyxIYJdD3T4WU85yYAx4/6anIxZCOqSqZR0wZzd3w3yRfcGz+J1dpgYHqYIAHihO1OcX3pO1m5PCQltEYyFSNOT+ocAxfISSfYi6ZGofOkroaCnYTUO43+jBbBO6eOs90knmsldk2hFmlVESVqAslYr7MRofpY6eoZVcfK5jywTruNttnVVdo6d1ESmmll/+dBl+OAvIKArrAlHOQr3sLQB1B/cv/0wLWby4gzb0MqRQXfzM8E489KG4ao057NY+2v3Ii+t8KU1fTsn/DLdBcC+SYSaAyQoihN6c=
