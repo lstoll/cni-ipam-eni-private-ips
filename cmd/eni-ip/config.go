@@ -38,6 +38,7 @@ type IPAMConfig struct {
 type IPAMArgs struct {
 	types.CommonArgs
 	MetadataEndpoint string `json:"metadata_endpoint,omitempty"`
+	IP               net.IP `json:"ip,omitempty"`
 }
 
 type Net struct {

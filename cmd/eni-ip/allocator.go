@@ -125,8 +125,12 @@ func (a *IPAllocator) Get(id string) (*types.IPConfig, error) {
 			return nil, err
 		}
 		if a.conf.Dynamic {
+			var requestedIP string
+			if a.conf.Args != nil {
+				requestedIP = a.conf.Args.IP.String()
+			}
 			// allocate a new one, spin until we have it
-			if err := a.allocateIp(); err != nil {
+			if err := a.allocateIP(requestedIP); err != nil {
 				return nil, err
 			}
 			iterations := 0
@@ -280,11 +284,18 @@ func (a *IPAllocator) fetchEniID() (string, error) {
 }
 
 // allocateIp a new IP on the ENI. Annoyingly, doesn't return it.
-func (a *IPAllocator) allocateIp() error {
-	_, err := a.ec2.AssignPrivateIpAddresses(&ec2.AssignPrivateIpAddressesInput{
-		NetworkInterfaceId:             &a.eniID,
-		SecondaryPrivateIpAddressCount: aws.Int64(1),
-	})
+func (a *IPAllocator) allocateIP(requestedIP string) error {
+	ipReq := &ec2.AssignPrivateIpAddressesInput{
+		NetworkInterfaceId: &a.eniID,
+	}
+	if requestedIP != "" {
+		ipReq.PrivateIpAddresses = []*string{
+			&requestedIP,
+		}
+	} else {
+		ipReq.SecondaryPrivateIpAddressCount = aws.Int64(1)
+	}
+	_, err := a.ec2.AssignPrivateIpAddresses(ipReq)
 	return err
 }
 
