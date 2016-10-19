@@ -30,6 +30,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/golang/glog"
 
 	"github.com/containernetworking/cni/pkg/types"
 )
@@ -125,9 +126,9 @@ func (a *IPAllocator) Get(id string) (*types.IPConfig, error) {
 			return nil, err
 		}
 		if a.conf.Dynamic {
-			var requestedIP string
+			var requestedIP net.IP
 			if a.conf.Args != nil {
-				requestedIP = a.conf.Args.IP.String()
+				requestedIP = a.conf.Args.IP
 			}
 			// allocate a new one, spin until we have it
 			if err := a.allocateIP(requestedIP); err != nil {
@@ -284,23 +285,26 @@ func (a *IPAllocator) fetchEniID() (string, error) {
 }
 
 // allocateIp a new IP on the ENI. Annoyingly, doesn't return it.
-func (a *IPAllocator) allocateIP(requestedIP string) error {
+func (a *IPAllocator) allocateIP(requestedIP net.IP) error {
+	glog.Infof("Request to allocate IP address, IP: %q", requestedIP.String)
 	ipReq := &ec2.AssignPrivateIpAddressesInput{
 		NetworkInterfaceId: &a.eniID,
 	}
-	if requestedIP != "" {
+	if requestedIP != nil {
 		ipReq.PrivateIpAddresses = []*string{
-			&requestedIP,
+			aws.String(requestedIP.String()),
 		}
 	} else {
 		ipReq.SecondaryPrivateIpAddressCount = aws.Int64(1)
 	}
+	glog.Infof("call AssignPrivateIpAddresses: %#v", ipReq)
 	_, err := a.ec2.AssignPrivateIpAddresses(ipReq)
 	return err
 }
 
 // freeIp frees up the given ip(s) from the ENI
 func (a *IPAllocator) freeIps(ips []string) error {
+	glog.Infof("Request to free IPs: %q", ips)
 	req := []*string{}
 	for _, ip := range ips {
 		req = append(req, aws.String(ip))
