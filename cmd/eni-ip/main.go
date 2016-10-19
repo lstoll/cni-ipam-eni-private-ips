@@ -16,12 +16,15 @@
 package main
 
 import (
+	"flag"
+
 	"github.com/containernetworking/cni/pkg/skel"
 	"github.com/containernetworking/cni/pkg/types"
 	"github.com/containernetworking/cni/pkg/version"
 )
 
 func main() {
+	flag.Parse()
 	skel.PluginMain(cmdAdd, cmdDel, version.Legacy)
 }
 
