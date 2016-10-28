@@ -202,8 +202,20 @@ func (a *IPAllocator) Get(id string) (*types.IPConfig, error) {
 		return nil, fmt.Errorf("No free IPs in network: %s", a.conf.Name)
 	}
 
+	_, defnet, err := net.ParseCIDR("0.0.0.0/0")
+	if err != nil {
+		panic(err)
+	}
+
 	return &types.IPConfig{
-		IP: net.IPNet{IP: reservedIP, Mask: subnet.Mask},
+		IP: net.IPNet{
+			IP:   reservedIP,
+			Mask: subnet.Mask,
+		},
+		Routes: []types.Route{
+			// Hope no GW makes for a interface route
+			types.Route{Dst: *defnet},
+		},
 	}, nil
 }
 
