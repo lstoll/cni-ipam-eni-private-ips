@@ -25,13 +25,27 @@ import (
 
 // IPAMConfig is the config for this driver
 type IPAMConfig struct {
-	Name           string
-	Type           string    `json:"type"`
-	Interface      string    `json:"interface"`
-	OverrideIPs    []net.IP  `json:"override_ips"`
-	OverrideSubnet string    `json:"override_subnet"`
-	Dynamic        bool      `json:"dynamic"`
-	Args           *IPAMArgs `json:"-"`
+	Name string
+	Type string `json:"type"`
+	// Interface is the interface to query additional IP allocations
+	// from.
+	Interface string `json:"interface"`
+	// OverrideIPs will override the IP list to allocate from over
+	// using the metadata API.
+	OverrideIPs []net.IP `json:"override_ips"`
+	// OverrideSubnet will override the subnet mask on the returned
+	// IP. Only the net size component is used, to calculate the mask.
+	// TODO - could this be override mask?
+	OverrideSubnet string `json:"override_subnet"`
+	// Dynamic will cause this module to request/release IP addresses
+	// from the AWS API on demand. Requires instance role IAM
+	// permissons to do this.
+	Dynamic bool `json:"dynamic"`
+	// SkipRoutes will cause the plugin to output no routes. This is
+	// useful for use in bridging when it has 'isDefaultGateway' set.
+	// In this case override subnet likely should be set to 0.0.0.0/32
+	SkipRoutes bool      `json:"skip_routes"`
+	Args       *IPAMArgs `json:"-"`
 }
 
 // IPAMArgs is the arguments to this ipam plugin

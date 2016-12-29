@@ -207,16 +207,19 @@ func (a *IPAllocator) Get(id string) (*types.IPConfig, error) {
 		panic(err)
 	}
 
-	return &types.IPConfig{
+	ret := &types.IPConfig{
 		IP: net.IPNet{
 			IP:   reservedIP,
 			Mask: subnet.Mask,
 		},
-		Routes: []types.Route{
+	}
+	if !a.conf.SkipRoutes {
+		ret.Routes = []types.Route{
 			// Hope no GW makes for a interface route
 			types.Route{Dst: *defnet},
-		},
-	}, nil
+		}
+	}
+	return ret, nil
 }
 
 // Release releases all IPs allocated for the container with given ID
