@@ -1,5 +1,7 @@
 # CNI IPAM For AWS ENI Private IPs
 
+## NOTE: This code is not production ready.
+
 This is an [IPAM plugin](https://github.com/containernetworking/cni/blob/master/SPEC.md#ip-allocation) for [CNI](https://github.com/containernetworking/cni).
 
 It uses the instance metadata API to get a list of Private IPs on a given
