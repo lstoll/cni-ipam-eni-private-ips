@@ -18,12 +18,13 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
@@ -69,7 +70,7 @@ func NewIPAllocator(conf *IPAMConfig, store Store) (*IPAllocator, error) {
 	}
 	i, err := net.InterfaceByName(conf.Interface)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "Error finding interface %s", conf.Interface)
 	}
 	sess := session.New()
 	alloc := &IPAllocator{

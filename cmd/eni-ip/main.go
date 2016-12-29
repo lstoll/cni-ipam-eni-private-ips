@@ -17,41 +17,57 @@ package main
 
 import (
 	"flag"
+	"os"
 
 	"github.com/containernetworking/cni/pkg/skel"
 	"github.com/containernetworking/cni/pkg/types"
 	"github.com/containernetworking/cni/pkg/version"
+	"github.com/golang/glog"
 )
 
 func main() {
+	// Drive glog via env vars
+	if os.Getenv("ENI_IP_GLOG_STDERR") == "1" {
+		flag.Lookup("alsologtostderr").Value.Set("true")
+	}
+	if lvl := os.Getenv("ENI_IP_GLOG_LEVEL"); lvl != "" {
+		flag.Lookup("v").Value.Set(lvl)
+	}
+
 	flag.Parse()
 	skel.PluginMain(cmdAdd, cmdDel, version.Legacy)
 }
 
 func cmdAdd(args *skel.CmdArgs) error {
+	glog.V(2).Info("starting cmdAdd")
 	ipamConf, err := LoadIPAMConfig(args.StdinData, args.Args)
 	if err != nil {
+		glog.Errorf("Error loading IPAM config: %q", err)
 		return err
 	}
 	store, err := NewStore(ipamConf.Name)
 	if err != nil {
+		glog.Errorf("Error loading store: %q", err)
 		return err
 	}
 	defer store.Close()
 
 	allocator, err := NewIPAllocator(ipamConf, store)
 	if err != nil {
+		glog.Errorf("Error creating IP allocator: %q", err)
 		return err
 	}
 
 	ipConf, err := allocator.Get(args.ContainerID)
 	if err != nil {
+		glog.Errorf("Error getting allocation: %q", err)
 		return err
 	}
 
 	r := &types.Result{
 		IP4: ipConf,
 	}
+	glog.V(2).Info("completed cmdAdd")
 	return r.Print()
 }
 
