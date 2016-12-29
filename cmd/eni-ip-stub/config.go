@@ -15,8 +15,14 @@
 
 package main
 
-import "github.com/lstoll/cni-ipam-eni-private-ips/pkg/eniip"
+import "net"
 
-func main() {
-	eniip.Main(&IPAllocator{})
+// IPAMConfig is the config for this driver
+type IPAMConfig struct {
+	Name string
+	// StubAddresses is the list of addresses to allocate from.
+	StubAddresses []net.IP `json:"stub_addresses"`
+	// Subnet is needed for ipvlan mode to indicate the subnet the machines should be in.
+	// Should be in cidr notation
+	Subnet string `json:"subnet"`
 }

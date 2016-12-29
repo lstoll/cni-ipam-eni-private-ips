@@ -15,13 +15,7 @@
 
 package main
 
-import (
-	"encoding/json"
-	"fmt"
-	"net"
-
-	"github.com/containernetworking/cni/pkg/types"
-)
+import "net"
 
 // IPAMConfig is the config for this driver
 type IPAMConfig struct {
@@ -44,43 +38,5 @@ type IPAMConfig struct {
 	// SkipRoutes will cause the plugin to output no routes. This is
 	// useful for use in bridging when it has 'isDefaultGateway' set.
 	// In this case override subnet likely should be set to 0.0.0.0/32
-	SkipRoutes bool      `json:"skip_routes"`
-	Args       *IPAMArgs `json:"-"`
-}
-
-// IPAMArgs is the arguments to this ipam plugin
-type IPAMArgs struct {
-	types.CommonArgs
-	MetadataEndpoint string `json:"metadata_endpoint,omitempty"`
-	IP               net.IP `json:"ip,omitempty"`
-}
-
-type Net struct {
-	Name string      `json:"name"`
-	IPAM *IPAMConfig `json:"ipam"`
-}
-
-// LoadIPAMConfig creates a NetworkConfig from the given network name.
-func LoadIPAMConfig(bytes []byte, args string) (*IPAMConfig, error) {
-	n := Net{}
-	if err := json.Unmarshal(bytes, &n); err != nil {
-		return nil, err
-	}
-
-	if args != "" {
-		n.IPAM.Args = &IPAMArgs{}
-		err := types.LoadArgs(args, n.IPAM.Args)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if n.IPAM == nil {
-		return nil, fmt.Errorf("IPAM config missing 'ipam' key")
-	}
-
-	// Copy net name into IPAM so not to drag Net struct around
-	n.IPAM.Name = n.Name
-
-	return n.IPAM, nil
+	SkipRoutes bool `json:"skip_routes"`
 }
