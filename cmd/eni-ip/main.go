@@ -35,7 +35,7 @@ func main() {
 	}
 
 	flag.Parse()
-	skel.PluginMain(cmdAdd, cmdDel, version.Legacy)
+	skel.PluginMain(cmdAdd, cmdDel, version.PluginSupports("0.1.0", "0.2.0", "0.3.0"))
 }
 
 func cmdAdd(args *skel.CmdArgs) error {
