@@ -95,7 +95,7 @@ func cmdAdd(a Allocator) func(*skel.CmdArgs) error {
 			glog.Errorf("Error loading IPAM config: %q", err)
 			return err
 		}
-		store, err := NewStore(nc.Name)
+		store, err := NewStore(nc.Name, "")
 		if err != nil {
 			glog.Errorf("Error loading store: %q", err)
 			return err
@@ -130,7 +130,7 @@ func cmdDel(a Allocator) func(*skel.CmdArgs) error {
 			return err
 		}
 
-		store, err := NewStore(nc.Name)
+		store, err := NewStore(nc.Name, "")
 		if err != nil {
 			return err
 		}
