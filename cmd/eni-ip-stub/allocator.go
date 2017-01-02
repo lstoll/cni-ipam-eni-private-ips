@@ -95,7 +95,7 @@ func (a *IPAllocator) Init(nc *eniip.Net, args *eniip.IPAMArgs, store eniip.Stor
 			},
 			{
 				Dst: *defaultNet,
-				GW:  net.ParseIP(braddrs[0].String()),
+				GW:  brv4s[0],
 			},
 		}
 
