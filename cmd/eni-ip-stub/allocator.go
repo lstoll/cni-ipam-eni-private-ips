@@ -34,11 +34,11 @@ var ErrEmptyPool = errors.New("No free private IPs found on interface")
 
 // IPAllocator is the implementation of the actual allocator
 type IPAllocator struct {
-	netConf      *eniip.Net
-	conf         *IPAMConfig
-	args         *eniip.IPAMArgs
-	bridgeRoutes []types.Route
-	store        eniip.Store
+	netConf  *eniip.Net
+	conf     *IPAMConfig
+	args     *eniip.IPAMArgs
+	bridgeGw net.IP
+	store    eniip.Store
 }
 
 // Init will return initialize the IPAllocator
@@ -78,27 +78,7 @@ func (a *IPAllocator) Init(nc *eniip.Net, args *eniip.IPAMArgs, store eniip.Stor
 				len(brv4s),
 			)
 		}
-		// route to brip/32 is a interface route
-		brNet := net.IPNet{
-			IP:   brv4s[0],
-			Mask: net.IPv4Mask(255, 255, 255, 255),
-		}
-		// default gw is via brip
-		_, defaultNet, err := net.ParseCIDR("0.0.0.0/0")
-		if err != nil {
-			panic(err)
-		}
-
-		a.bridgeRoutes = []types.Route{
-			{
-				Dst: brNet,
-			},
-			{
-				Dst: *defaultNet,
-				GW:  brv4s[0],
-			},
-		}
-
+		a.bridgeGw = brv4s[0]
 	}
 	return nil
 }
@@ -111,7 +91,8 @@ func (a *IPAllocator) Get(id string) (*types.IPConfig, error) {
 	var ips []net.IP
 	var subnet *net.IPNet
 
-	var routes []types.Route
+	ret := &types.IPConfig{}
+
 	var err error
 	if a.netConf.Type == "ipvlan" {
 		_, subnet, err = net.ParseCIDR(a.conf.Subnet)
@@ -122,7 +103,7 @@ func (a *IPAllocator) Get(id string) (*types.IPConfig, error) {
 		if err != nil {
 			panic(err)
 		}
-		routes = []types.Route{
+		ret.Routes = []types.Route{
 			// Hope no GW makes for a interface route. In L3 mode we
 			// use the host interface in L2 mode we should be smarter
 			// here (accept passed in routes?)
@@ -134,7 +115,26 @@ func (a *IPAllocator) Get(id string) (*types.IPConfig, error) {
 		if err != nil {
 			panic(err)
 		}
-		routes = a.bridgeRoutes
+		// route to brip/32 is a interface route
+		brNet := net.IPNet{
+			IP:   a.bridgeGw,
+			Mask: net.IPv4Mask(255, 255, 255, 255),
+		}
+
+		_, defNet, err := net.ParseCIDR("0.0.0.0/0")
+		if err != nil {
+			panic(err)
+		}
+
+		ret.Routes = []types.Route{
+			{
+				Dst: brNet,
+			},
+			{
+				Dst: *defNet,
+				GW:  a.bridgeGw,
+			},
+		}
 	}
 	ips = a.conf.StubAddresses
 
@@ -174,13 +174,12 @@ func (a *IPAllocator) Get(id string) (*types.IPConfig, error) {
 		return nil, fmt.Errorf("No free IPs in network: %s", a.conf.Name)
 	}
 
-	return &types.IPConfig{
-		IP: net.IPNet{
-			IP:   reservedIP,
-			Mask: subnet.Mask,
-		},
-		Routes: routes,
-	}, nil
+	ret.IP = net.IPNet{
+		IP:   reservedIP,
+		Mask: subnet.Mask,
+	}
+
+	return ret, nil
 }
 
 // Release releases all IPs allocated for the container with given ID
