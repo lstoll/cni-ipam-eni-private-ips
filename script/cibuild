@@ -7,10 +7,13 @@ go test -v ./...
 echo "--> Creating artifacts"
 mkdir -p out
 go build -o eni-ip ./cmd/eni-ip
+go build -o eni-ip-stub ./cmd/eni-ip-stub
 if [ ! -z "$TRAVIS_BRANCH" ]; then
     if [ "$TRAVIS_BRANCH" == "master" ]; then
         cp eni-ip out/eni-ip
+	cp eni-ip-stub out/eni-ip-stub
     else
         cp eni-ip out/eni-ip-$TRAVIS_BRANCH
+	cp eni-ip-stub out/eni-ip-stub-$TRAVIS_BRANCH
     fi
 fi

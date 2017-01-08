@@ -18,12 +18,14 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/lstoll/cni-ipam-eni-private-ips/pkg/eniip"
+	"github.com/pkg/errors"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
@@ -45,7 +47,8 @@ var ErrEmptyPool = errors.New("No free private IPs found on interface")
 // IPAllocator is the implementation of the actual allocator
 type IPAllocator struct {
 	conf  *IPAMConfig
-	store Store
+	args  *eniip.IPAMArgs
+	store eniip.Store
 	md    mdClient
 	ec2   ec2Client
 	iface *net.Interface
@@ -62,46 +65,48 @@ type ec2Client interface {
 	UnassignPrivateIpAddresses(*ec2.UnassignPrivateIpAddressesInput) (*ec2.UnassignPrivateIpAddressesOutput, error)
 }
 
-// NewIPAllocator will return an initialized IPAllocator
-func NewIPAllocator(conf *IPAMConfig, store Store) (*IPAllocator, error) {
-	if conf.Interface == "" && (len(conf.OverrideIPs) == 0 || conf.OverrideSubnet == "") {
-		return nil, ErrInvalidConfig
-	}
-	i, err := net.InterfaceByName(conf.Interface)
+// Init will return initialize the IPAllocator
+func (a *IPAllocator) Init(nc *eniip.Net, args *eniip.IPAMArgs, store eniip.Store) error {
+	a.conf = &IPAMConfig{}
+	err := json.Unmarshal(nc.IPAM, a.conf)
 	if err != nil {
-		return nil, err
+		return errors.Wrap(err, "Error unmarshaling IPAMConfig")
+	}
+	if a.conf.Interface == "" && (len(a.conf.OverrideIPs) == 0 || a.conf.OverrideSubnet == "") {
+		return ErrInvalidConfig
+	}
+	i, err := net.InterfaceByName(a.conf.Interface)
+	if err != nil {
+		return errors.Wrapf(err, "Error finding interface")
 	}
 	sess := session.New()
-	alloc := &IPAllocator{
-		conf:  conf,
-		store: store,
-		md:    ec2metadata.New(sess),
-		iface: i,
-	}
-	alloc.eniID, err = alloc.fetchEniID()
+	a.store = store
+	a.md = ec2metadata.New(sess)
+	a.iface = i
+
+	a.eniID, err = a.fetchEniID()
 	if err != nil {
-		return nil, err
+		return errors.Wrap(err, "Error fetching ENI ID")
 	}
-	if conf.Dynamic {
+	if a.conf.Dynamic {
 		// need to set up EC2. And find the region
 		type iidoc struct {
 			Region string `json:"region"`
 		}
-		riid, err := alloc.md.GetDynamicData("instance-identity/document")
+		riid, err := a.md.GetDynamicData("instance-identity/document")
 		if err != nil {
-			return nil, err
+			return err
 		}
 		iid := &iidoc{}
 		if err := json.Unmarshal([]byte(riid), iid); err != nil {
-			return nil, err
+			return err
 		}
 		config := aws.NewConfig().
 			WithCredentials(ec2rolecreds.NewCredentials(sess)).
 			WithRegion(iid.Region)
-		alloc.ec2 = ec2.New(session.New(config))
+		a.ec2 = ec2.New(session.New(config))
 	}
-
-	return alloc, nil
+	return nil
 }
 
 // Get returns newly allocated IP along with its config
@@ -127,8 +132,8 @@ func (a *IPAllocator) Get(id string) (*types.IPConfig, error) {
 		}
 		if a.conf.Dynamic {
 			var requestedIP net.IP
-			if a.conf.Args != nil {
-				requestedIP = a.conf.Args.IP
+			if a.args != nil {
+				requestedIP = a.args.IP
 			}
 			// allocate a new one, spin until we have it
 			if err := a.allocateIP(requestedIP); err != nil {
@@ -207,16 +212,19 @@ func (a *IPAllocator) Get(id string) (*types.IPConfig, error) {
 		panic(err)
 	}
 
-	return &types.IPConfig{
+	ret := &types.IPConfig{
 		IP: net.IPNet{
 			IP:   reservedIP,
 			Mask: subnet.Mask,
 		},
-		Routes: []types.Route{
+	}
+	if !a.conf.SkipRoutes {
+		ret.Routes = []types.Route{
 			// Hope no GW makes for a interface route
 			types.Route{Dst: *defnet},
-		},
-	}, nil
+		}
+	}
+	return ret, nil
 }
 
 // Release releases all IPs allocated for the container with given ID

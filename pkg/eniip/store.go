@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package eniip
 
 import (
 	"io/ioutil"
@@ -46,9 +46,14 @@ type DiskStore struct {
 	DataDir string
 }
 
-func NewStore(network string) (*DiskStore, error) {
-	dir := filepath.Join(defaultDataDir, network)
-	ds, err := disk.New(network)
+// NewStore returns a new store. If dataDir is empty, a default dir
+// will be used
+func NewStore(network, dataDir string) (*DiskStore, error) {
+	if dataDir == "" {
+		dataDir = defaultDataDir
+	}
+	dir := filepath.Join(dataDir, network)
+	ds, err := disk.New(network, dataDir)
 	if err != nil {
 		return nil, err
 	}

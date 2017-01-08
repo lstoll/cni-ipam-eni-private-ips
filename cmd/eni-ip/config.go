@@ -15,58 +15,28 @@
 
 package main
 
-import (
-	"encoding/json"
-	"fmt"
-	"net"
-
-	"github.com/containernetworking/cni/pkg/types"
-)
+import "net"
 
 // IPAMConfig is the config for this driver
 type IPAMConfig struct {
-	Name           string
-	Type           string    `json:"type"`
-	Interface      string    `json:"interface"`
-	OverrideIPs    []net.IP  `json:"override_ips"`
-	OverrideSubnet string    `json:"override_subnet"`
-	Dynamic        bool      `json:"dynamic"`
-	Args           *IPAMArgs `json:"-"`
-}
-
-// IPAMArgs is the arguments to this ipam plugin
-type IPAMArgs struct {
-	types.CommonArgs
-	MetadataEndpoint string `json:"metadata_endpoint,omitempty"`
-	IP               net.IP `json:"ip,omitempty"`
-}
-
-type Net struct {
-	Name string      `json:"name"`
-	IPAM *IPAMConfig `json:"ipam"`
-}
-
-// LoadIPAMConfig creates a NetworkConfig from the given network name.
-func LoadIPAMConfig(bytes []byte, args string) (*IPAMConfig, error) {
-	n := Net{}
-	if err := json.Unmarshal(bytes, &n); err != nil {
-		return nil, err
-	}
-
-	if args != "" {
-		n.IPAM.Args = &IPAMArgs{}
-		err := types.LoadArgs(args, n.IPAM.Args)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if n.IPAM == nil {
-		return nil, fmt.Errorf("IPAM config missing 'ipam' key")
-	}
-
-	// Copy net name into IPAM so not to drag Net struct around
-	n.IPAM.Name = n.Name
-
-	return n.IPAM, nil
+	Name string
+	Type string `json:"type"`
+	// Interface is the interface to query additional IP allocations
+	// from.
+	Interface string `json:"interface"`
+	// OverrideIPs will override the IP list to allocate from over
+	// using the metadata API.
+	OverrideIPs []net.IP `json:"override_ips"`
+	// OverrideSubnet will override the subnet mask on the returned
+	// IP. Only the net size component is used, to calculate the mask.
+	// TODO - could this be override mask?
+	OverrideSubnet string `json:"override_subnet"`
+	// Dynamic will cause this module to request/release IP addresses
+	// from the AWS API on demand. Requires instance role IAM
+	// permissons to do this.
+	Dynamic bool `json:"dynamic"`
+	// SkipRoutes will cause the plugin to output no routes. This is
+	// useful for use in bridging when it has 'isDefaultGateway' set.
+	// In this case override subnet likely should be set to 0.0.0.0/32
+	SkipRoutes bool `json:"skip_routes"`
 }

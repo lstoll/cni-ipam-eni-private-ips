@@ -1,5 +1,4 @@
 // Copyright 2015 CNI authors
-// Modifications copyright (C) 2016 Lincoln Stoll
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,10 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package backend
 
-import "github.com/lstoll/cni-ipam-eni-private-ips/pkg/eniip"
+import "net"
 
-func main() {
-	eniip.Main(&IPAllocator{})
+type Store interface {
+	Lock() error
+	Unlock() error
+	Close() error
+	Reserve(id string, ip net.IP) (bool, error)
+	LastReservedIP() (net.IP, error)
+	Release(ip net.IP) error
+	ReleaseByID(id string) error
 }

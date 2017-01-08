@@ -20,6 +20,9 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/containernetworking/cni/plugins/ipam/host-local/backend"
 )
 
 const lastIPFile = "last_reserved_ip"
@@ -31,8 +34,14 @@ type Store struct {
 	dataDir string
 }
 
-func New(network string) (*Store, error) {
-	dir := filepath.Join(defaultDataDir, network)
+// Store implements the Store interface
+var _ backend.Store = &Store{}
+
+func New(network, dataDir string) (*Store, error) {
+	if dataDir == "" {
+		dataDir = defaultDataDir
+	}
+	dir := filepath.Join(dataDir, network)
 	if err := os.MkdirAll(dir, 0644); err != nil {
 		return nil, err
 	}
@@ -53,7 +62,7 @@ func (s *Store) Reserve(id string, ip net.IP) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if _, err := f.WriteString(id); err != nil {
+	if _, err := f.WriteString(strings.TrimSpace(id)); err != nil {
 		f.Close()
 		os.Remove(f.Name())
 		return false, err
@@ -96,7 +105,7 @@ func (s *Store) ReleaseByID(id string) error {
 		if err != nil {
 			return nil
 		}
-		if string(data) == id {
+		if strings.TrimSpace(string(data)) == strings.TrimSpace(id) {
 			if err := os.Remove(path); err != nil {
 				return nil
 			}

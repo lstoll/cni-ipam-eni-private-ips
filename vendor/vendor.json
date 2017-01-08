@@ -205,32 +205,38 @@
 		{
 			"checksumSHA1": "ZiJmQ52xR3Qy53NbfGRct4mVhQM=",
 			"path": "github.com/containernetworking/cni/pkg/skel",
-			"revision": "a29fc24f113ec11328edabaf883f9a8777a39ff2",
-			"revisionTime": "2016-09-22T22:11:34Z"
+			"revision": "98ff61aac32dcf2eb3044a0d5e5f1814837b3c75",
+			"revisionTime": "2016-12-19T19:02:20Z"
 		},
 		{
 			"checksumSHA1": "hq0pWw7MU74nQ8tnO5afBDwrYhU=",
 			"path": "github.com/containernetworking/cni/pkg/types",
-			"revision": "a29fc24f113ec11328edabaf883f9a8777a39ff2",
-			"revisionTime": "2016-09-22T22:11:34Z"
+			"revision": "98ff61aac32dcf2eb3044a0d5e5f1814837b3c75",
+			"revisionTime": "2016-12-19T19:02:20Z"
 		},
 		{
-			"checksumSHA1": "uaffm5CnFQfddTIR9RSECNOf8W8=",
+			"checksumSHA1": "SuXvoRn3CWy/GvUbqktbQ2z+SVs=",
 			"path": "github.com/containernetworking/cni/pkg/version",
-			"revision": "a29fc24f113ec11328edabaf883f9a8777a39ff2",
-			"revisionTime": "2016-09-22T22:11:34Z"
+			"revision": "98ff61aac32dcf2eb3044a0d5e5f1814837b3c75",
+			"revisionTime": "2016-12-19T19:02:20Z"
 		},
 		{
-			"checksumSHA1": "kNo9BI2jdDuvdW/PMMKpvpwnIUI=",
+			"checksumSHA1": "Hug6T2yjPxjFGCrcvjujTBcovyc=",
+			"path": "github.com/containernetworking/cni/plugins/ipam/host-local/backend",
+			"revision": "98ff61aac32dcf2eb3044a0d5e5f1814837b3c75",
+			"revisionTime": "2016-12-19T19:02:20Z"
+		},
+		{
+			"checksumSHA1": "KTvFlQF9iYJuIVqTnu7I9cN+hH0=",
 			"path": "github.com/containernetworking/cni/plugins/ipam/host-local/backend/disk",
-			"revision": "a29fc24f113ec11328edabaf883f9a8777a39ff2",
-			"revisionTime": "2016-09-22T22:11:34Z"
+			"revision": "98ff61aac32dcf2eb3044a0d5e5f1814837b3c75",
+			"revisionTime": "2016-12-19T19:02:20Z"
 		},
 		{
-			"checksumSHA1": "U/m3299ZNvUJLernlHBjpUfXzg4=",
+			"checksumSHA1": "JipPRLfdjF/YIh27atY9Pz06YVY=",
 			"path": "github.com/containernetworking/cni/plugins/ipam/host-local/backend/testing",
-			"revision": "a29fc24f113ec11328edabaf883f9a8777a39ff2",
-			"revisionTime": "2016-09-22T22:11:34Z"
+			"revision": "98ff61aac32dcf2eb3044a0d5e5f1814837b3c75",
+			"revisionTime": "2016-12-19T19:02:20Z"
 		},
 		{
 			"checksumSHA1": "FCeEm2BWZV/n4oTy+SGd/k0Ab5c=",
@@ -251,6 +257,12 @@
 			"path": "github.com/jmespath/go-jmespath",
 			"revision": "02069867108293276989b2f785740e0de20b5e58",
 			"revisionTime": "2016-10-10T16:34:09Z"
+		},
+		{
+			"checksumSHA1": "ynJSWoF6v+3zMnh9R0QmmG6iGV8=",
+			"path": "github.com/pkg/errors",
+			"revision": "248dadf4e9068a0b3e79f02ed0a610d935de5302",
+			"revisionTime": "2016-10-29T09:36:37Z"
 		}
 	],
 	"rootPath": "github.com/lstoll/cni-ipam-eni-private-ips"
